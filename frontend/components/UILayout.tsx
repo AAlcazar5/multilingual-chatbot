@@ -1,5 +1,6 @@
+// UILayout.tsx
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Chat from "./Chat";
 import Sidebar from "./Sidebar";
 import { Conversation, Message } from "../types";
@@ -8,42 +9,48 @@ export default function UILayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [language, setLanguage] = useState("English");
 
-  const translations: Record<string, string> = {
-    English:
-      "Hello, I'm a multilingual chatbot. Start the conversation in the language of your choice!",
-    Spanish:
-      "Hola, soy un chatbot multilingüe. ¡Comienza la conversación en el idioma de tu elección!",
-    Italian:
-      "Ciao, sono un chatbot multilingüe. Inizia la conversazione nella lingua che preferisci!",
-    French:
-      "Bonjour, je suis un chatbot multilingüe. Commencez la conversation dans la langue de votre choix!",
-    Portuguese:
-      "Olá, eu sou um chatbot multilíngue. Comece a conversa no idioma de sua escolha!",
-    German:
-      "Hallo, ich bin ein mehrsprachiger Chatbot. Beginnen Sie das Gespräch in der Sprache Ihrer Wahl!",
-    Russian:
-      "Привет, я многоязычный чат-бот. Начните разговор на языке по вашему выбору!",
-    Mandarin:
-      "你好, 我是一个多语言聊天机器人。请用您选择的语言开始对话！",
-    Hindi:
-      "नमस्ते, मैं एक बहुभाषी चैटबोट हूँ। अपनी पसंद की भाषा में बातचीत शुरू करें!",
-    Arabic:
-      "مرحبًا, أنا روبوت دردشة متعدد اللغات. ابدأ المحادثة باللغة التي تختارها!",
-    Bengali:
-      "হ্যালো, আমি একটি বহুভাষিক চ্যাটবট। আপনার পছন্দের ভাষায় আলাপ শুরু করুন!",
-    Urdu:
-      "ہیلو, میں ایک کثیر لسانی چیٹ بوٹ ہوں۔ اپنی پسند کی زبان میں بات چیت شروع کریں!",
-    Indonesian:
-      "Halo, saya adalah chatbot multibahasa. Mulailah percakapan dalam bahasa pilihan Anda!",
-    Japanese:
-      "こんにちは, 私は多言語対応のチャットボットです。お好きな言語で会話を始めてください！",
-    Tagalog:
-      "Kamusta! Ako'y isang chatbot na marunong ng maraming wika. Simulan na natin ang usapan sa wikang gusto mo!",
-  };
+  // Memoize the translations object so that it doesn't change on every render.
+  const translations = useMemo(
+    () => ({
+      English:
+        "Hello, I'm a multilingual chatbot. Start the conversation in the language of your choice!",
+      Spanish:
+        "Hola, soy un chatbot multilingüe. ¡Comienza la conversación en el idioma de tu elección!",
+      Italian:
+        "Ciao, sono un chatbot multilingüe. Inizia la conversazione nella lingua che preferisci!",
+      French:
+        "Bonjour, je suis un chatbot multilingüe. Commencez la conversation dans la langue de votre choix!",
+      Portuguese:
+        "Olá, eu sou un chatbot multilíngue. Comece a conversa no idioma de sua escolha!",
+      German:
+        "Hallo, ich bin ein mehrsprachiger Chatbot. Beginnen Sie das Gespräch in der Sprache Ihrer Wahl!",
+      Russian:
+        "Привет, я многоязычный чат-бот. Начните разговор на языке по вашему выбору!",
+      Mandarin:
+        "你好, 我是一个多语言聊天机器人。请用您选择的语言开始对话！",
+      Hindi:
+        "नमस्ते, मैं एक बहुभाषी चैटबोट हूँ। अपनी पसंद की भाषा में बातचीत शुरू करें!",
+      Arabic:
+        "مرحبًا, أنا روبوت دردشة متعدد اللغات. ابدأ المحادثة باللغة التي تختارها!",
+      Bengali:
+        "হ্যালো, আমি একটি বহুভাষিক চ্যাটবট। আপনার পছন্দের ভাষায় আলাপ শুরু করুন!",
+      Urdu:
+        "ہیلو, میں ایک کثیر لسانی چیٹ بوٹ ہوں۔ اپنی پسند کی زبان میں بات چیت شروع کریں!",
+      Indonesian:
+        "Halo, saya adalah chatbot multibahasa. Mulailah percakapan dalam bahasa pilihan Anda!",
+      Japanese:
+        "こんにちは, 私は多言語対応のチャットボットです。お好きな言語で会話を始めてください！",
+      Tagalog:
+        "Kamusta! Ako'y isang chatbot na marunong ng maraming wika. Simulan na natin ang usapan sa wikang gusto mo!",
+    }),
+    []
+  );
 
-  const getInitialMessage = (lang: string): string => {
-    return translations[lang] || translations["English"];
-  };
+  // Wrap getInitialMessage in useCallback so its reference remains stable.
+  const getInitialMessage = useCallback((lang: string): string => {
+    return translations[lang as keyof typeof translations] || translations["English"];
+  }, [translations]);
+  
 
   const [conversations, setConversations] = useState<Conversation[]>([
     {
@@ -67,7 +74,7 @@ export default function UILayout() {
         )
       );
     }
-  }, [language, activeConversationId]);
+  }, [language, activeConversationId, getInitialMessage]);
 
   const generateTitleFromMessage = (message: string): string => {
     const words = message.trim().split(" ");

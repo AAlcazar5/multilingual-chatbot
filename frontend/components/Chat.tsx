@@ -1,29 +1,29 @@
+// Chat.tsx
 "use client";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ChatProps, Message } from "../types/index";
-import ChatDisplay from "./ChatDisplay";
-import ChatInput from "./ChatInput";
 
-export default function Chat({
+const Chat: React.FC<ChatProps> = ({
   conversationId,
   messages,
   onSendMessage,
   onFirstUserMessage,
   language,
   onLanguageChange,
-}: ChatProps) {
+}) => {
   const [input, setInput] = useState("");
 
-  // Clear input when conversation changes.
+  // Clear the input when switching conversations.
   useEffect(() => {
     setInput("");
   }, [conversationId]);
 
+  // Setup SpeechRecognition on mount.
   useEffect(() => {
     if (typeof window !== "undefined") {
       const srWindow = window as Window & {
-        SpeechRecognition?: any;
-        webkitSpeechRecognition?: any;
+        SpeechRecognition?: typeof SpeechRecognition;
+        webkitSpeechRecognition?: typeof SpeechRecognition;
       };
       srWindow.SpeechRecognition =
         srWindow.SpeechRecognition || srWindow.webkitSpeechRecognition;
@@ -31,7 +31,7 @@ export default function Chat({
   }, []);
 
   const startListening = () => {
-    const srWindow = window as Window & { SpeechRecognition?: any };
+    const srWindow = window as Window & { SpeechRecognition?: typeof SpeechRecognition };
     if (!srWindow.SpeechRecognition) {
       alert("Your browser doesn't support speech recognition.");
       return;
@@ -39,6 +39,7 @@ export default function Chat({
     const recognition = new srWindow.SpeechRecognition();
     recognition.continuous = false;
     recognition.interimResults = false;
+
     const langMapping: Record<string, string> = {
       English: "en-US",
       Spanish: "es-ES",
@@ -58,13 +59,13 @@ export default function Chat({
     };
     recognition.lang = langMapping[language] || "en-US";
     let finalTranscript = "";
-    recognition.onresult = (event: any) => {
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
       console.log("Speech recognition result event:", event);
       finalTranscript = event.results[0][0].transcript;
       console.log("Final transcript:", finalTranscript);
       setInput(finalTranscript);
     };
-    recognition.onerror = (event: any) => {
+    recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
       console.error("Speech recognition error:", event.error);
       if (event.error === "network") {
         console.log("Network error encountered. Retrying in 1 second...");
@@ -84,10 +85,7 @@ export default function Chat({
     const messageContent = transcript !== undefined ? transcript : input.trim();
     if (!messageContent) return;
     const userMessage: Message = { role: "user", content: messageContent };
-    if (
-      messages.filter((msg) => msg.role === "user").length === 0 &&
-      onFirstUserMessage
-    ) {
+    if (messages.filter((msg) => msg.role === "user").length === 0 && onFirstUserMessage) {
       onFirstUserMessage(messageContent);
     }
     onSendMessage(userMessage);
@@ -99,10 +97,7 @@ export default function Chat({
         body: JSON.stringify({ question: messageContent, language }),
       });
       const data = await response.json();
-      const assistantMessage: Message = {
-        role: "assistant",
-        content: data.answer,
-      };
+      const assistantMessage: Message = { role: "assistant", content: data.answer };
       onSendMessage(assistantMessage);
     } catch (error) {
       console.error("Error while fetching the answer:", error);
@@ -136,16 +131,75 @@ export default function Chat({
 
   return (
     <div className="flex flex-col h-full bg-gray-900 text-white">
-      <ChatDisplay messages={messages} language={language} onSpeak={speakText} />
-      <ChatInput
-        input={input}
-        setInput={setInput}
-        onSubmit={handleSubmit}
-        onStartListening={startListening}
-        language={language}
-        onLanguageChange={onLanguageChange}
-        messagesExist={messages.some((msg) => msg.role === "user")}
-      />
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {messages.map((msg, index) => {
+          const isAssistant = msg.role === "assistant";
+          return (
+            <div key={index} className={`flex ${isAssistant ? "justify-start" : "justify-end"}`}>
+              <div className={`rounded p-3 max-w-[75%] ${isAssistant ? "bg-gray-700" : "bg-blue-600"}`}>
+                <p>
+                  {msg.content}
+                  {isAssistant && (
+                    <span
+                      onClick={() => speakText(msg.content)}
+                      className="ml-2 inline-block cursor-pointer hover:text-purple-400"
+                    >
+                      🔊
+                    </span>
+                  )}
+                </p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <div className="p-2 sm:p-4 flex items-center bg-gray-900">
+        <textarea
+          rows={1}
+          className="flex-1 p-2 text-black rounded focus:outline-none text-sm"
+          placeholder="Type your question..."
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+        />
+        <div className="flex items-center space-x-2 ml-2">
+          <select
+            value={language}
+            onChange={(e) => onLanguageChange(e.target.value)}
+            disabled={messages.some((msg) => msg.role === "user")}
+            className="py-2 px-2 w-24 flex-none rounded text-black focus:outline-none text-sm"
+          >
+            <option value="English">English</option>
+            <option value="Spanish">Español - Spanish</option>
+            <option value="Italian">Italiano - Italian</option>
+            <option value="French">Français - French</option>
+            <option value="Portuguese">Português - Portuguese</option>
+            <option value="German">Deutsch - German</option>
+            <option value="Russian">Русский - Russian</option>
+            <option value="Mandarin">中文 - Mandarin</option>
+            <option value="Hindi">हिन्दी - Hindi</option>
+            <option value="Arabic">العربية - Arabic</option>
+            <option value="Bengali">বাংলা - Bengali</option>
+            <option value="Urdu">اردو - Urdu</option>
+            <option value="Indonesian">Indonesian</option>
+            <option value="Japanese">日本語 - Japanese</option>
+            <option value="Tagalog">Tagalog</option>
+          </select>
+          <button
+            onClick={startListening}
+            className="px-2 sm:px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none text-sm"
+          >
+            🎤
+          </button>
+          <button
+            onClick={() => handleSubmit()}
+            className="px-2 sm:px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 focus:outline-none text-sm ml-auto"
+          >
+            Send
+          </button>
+        </div>
+      </div>
     </div>
   );
-}
+};
+
+export default Chat;
