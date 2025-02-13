@@ -1,36 +1,126 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Multilingual Chatbot
 
-## Getting Started
+A responsive, multilingual chatbot application that supports both text and voice interactions. Users can type or speak their messages, and the app responds using built-in text-to-speech capabilities. The project features a modern, component-based design and is built with a Next.js/TypeScript frontend and a Python/FastAPI backend.
 
-First, run the development server:
+## Table of Contents
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- [Multilingual Chatbot](#multilingual-chatbot)
+  - [Table of Contents](#table-of-contents)
+  - [Features](#features)
+  - [Tech Stack](#tech-stack)
+  - [Setup](#setup)
+    - [Frontend](#frontend)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Multilingual Support:**  
+  Select your preferred language from the dropdown (English, Spanish, Italian, French, etc.) – the language selector becomes disabled after the first user message is sent.
+  
+- **Voice Input (Speech Recognition):**  
+  Use your microphone to input messages via the browser’s built-in SpeechRecognition API.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Text-to-Speech (TTS):**  
+  Listen to the chatbot’s responses using the browser’s built-in SpeechSynthesis API (configured with a speech rate of 0.9).
 
-## Learn More
+- **Responsive Design:**  
+  The layout adapts for different screen sizes. On smaller screens, the bottom input row shrinks to fit the available space.
 
-To learn more about Next.js, take a look at the following resources:
+- **Component-Based Architecture:**  
+  The frontend code is refactored into separate components for displaying messages and handling user input.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Tech Stack
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Frontend:**  
+  - [Next.js](https://nextjs.org/)  
+  - [React](https://reactjs.org/)  
+  - [TypeScript](https://www.typescriptlang.org/)  
+  - [Tailwind CSS](https://tailwindcss.com/)
 
-## Deploy on Vercel
+- **Backend:**  
+  - [Python](https://www.python.org/)  
+  - [FastAPI](https://fastapi.tiangolo.com/)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **APIs:**  
+  - Browser Web Speech API (for both SpeechRecognition and SpeechSynthesis)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Setup
+
+### Frontend
+
+1. **Clone the repository:**
+
+   ```bash
+   git clone https://github.com/yourusername/multilingual-chatbot.git
+   cd multilingual-chatbot/frontend
+
+    Install dependencies:
+
+npm install
+
+Run the development server:
+
+    npm run dev
+
+    The frontend will be available at http://localhost:3000.
+
+Backend
+
+    Navigate to the backend folder:
+
+cd ../backend
+
+Set up your environment variables:
+Create a .env file and add your required variables (e.g., API keys, if needed).
+
+Install dependencies:
+
+pip install -r requirements.txt
+
+Run the FastAPI server:
+
+    uvicorn main:app --reload
+
+    The backend will be available at http://localhost:8000.
+
+Usage
+
+    Chatting:
+    Type your message in the input box or use the microphone button to speak.
+    The Send button or automatic submission (after speech recognition ends) sends your message to the backend, which responds accordingly.
+
+    Voice Output:
+    Click the speaker icon next to the assistant messages to hear the response using the browser’s TTS (speech synthesis).
+
+    Language Selection:
+    Choose your preferred language from the dropdown. The dropdown is fixed in width to keep the UI neat and becomes disabled after you send your first message.
+
+Project Structure
+
+/multilingual-chatbot
+  ├── backend/                # FastAPI backend
+  │   ├── main.py
+  │   └── .env                # Environment variables (if needed)
+  ├── frontend/               # Next.js/TypeScript frontend
+  │   ├── components/
+  │   │   ├── Chat.tsx        # Main chat component integrating display and input
+  │   │   ├── ChatDisplay.tsx # Renders conversation messages
+  │   │   └── ChatInput.tsx   # Handles input, speech recognition, and controls
+  │   ├── types/
+  │   │   └── index.ts        # All TypeScript interfaces (ChatProps, Message, etc.)
+  │   └── package.json
+  └── README.md
+
+Troubleshooting
+
+    Speech Recognition Errors:
+    If you see "network" errors in the console, ensure your site is served over HTTPS, microphone permissions are granted, and you're using a supported browser (e.g., Chrome or Edge).
+
+    Voice Output Issues:
+    If the TTS output sounds unnatural, try adjusting the rate or verifying your browser’s default voice settings.
+
+    Responsive Layout:
+    The bottom row is designed to be responsive. If layout issues persist on small screens, inspect the Tailwind CSS classes and adjust the padding/margins as needed.
+
+License
+
+This project is licensed under the MIT License. See the LICENSE file for details.
